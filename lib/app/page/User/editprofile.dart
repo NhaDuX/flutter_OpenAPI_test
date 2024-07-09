@@ -1,4 +1,6 @@
-import 'package:flutter_api/app/page/detail.dart';
+import 'package:flutter_api/app/data/sharepre.dart';
+import 'package:flutter_api/app/page/User/detail.dart';
+import 'package:flutter_api/mainpage.dart';
 
 import '/app/data/api.dart';
 import '/app/model/user.dart';
@@ -18,10 +20,23 @@ class _UpdateProfileState extends State<UpdateProfile> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _numberIDController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
   final TextEditingController _schoolKeyController = TextEditingController();
   final TextEditingController _schoolYearController = TextEditingController();
   final TextEditingController _birthDayController = TextEditingController();
   final TextEditingController _imageURLController = TextEditingController();
+  reloadUser() async {
+    String token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiMDkyNjkyNzE2NCIsIklEIjoiMjFESDExNDM2NyIsImp0aSI6IjFkNzgxNDQxLTU2YWYtNGVhOC05YWZiLTZiMjE4OGVhYTM0NSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlN0dWRlbnQiLCJleHAiOjE3MjgzNzQzNTJ9.x77-4XJ8I-EMW4CJfMeS2r4hRNiwGzRLeAOr44Q4EVE";
+    var user = await APIRepository().current(token);
+    saveUser(user);
+    //
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Mainpage(initialIndex: 3),
+        ));
+  }
 
   @override
   void initState() {
@@ -29,6 +44,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     _fullNameController.text = widget.user.fullName!;
     _numberIDController.text = widget.user.idNumber!;
     _phoneNumberController.text = widget.user.phoneNumber!;
+    _genderController.text = widget.user.gender!;
     _schoolKeyController.text = widget.user.schoolKey!;
     _schoolYearController.text = widget.user.schoolYear!;
     _birthDayController.text = widget.user.birthDay!;
@@ -37,11 +53,10 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   Future<String> updateProfile() async {
     return await APIRepository().updateProfile(
-      //token: widget.token as String,
       numberID: _numberIDController.text,
       fullName: _fullNameController.text,
       phoneNumber: _phoneNumberController.text,
-      //gender: getGender(),
+      gender: _genderController.text,
       birthDay: _birthDayController.text,
       schoolYear: _schoolYearController.text,
       schoolKey: _schoolKeyController.text,
@@ -50,66 +65,55 @@ class _UpdateProfileState extends State<UpdateProfile> {
     );
   }
 
-  int getGender(String gender) {
-    if (gender == "Male") {
-      return 1;
-    } else if (gender == "Female") {
-      return 2;
+  getGender() {
+    if (_gender == 1) {
+      return "Male";
+    } else if (_gender == 2) {
+      return "Female";
     }
-    return 3;
+    return "Other";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
+        backgroundColor: const Color(0xFFF5F6FA),
         title: const Text("Update Profile"),
       ),
-      body: Padding(
+      body: Container(
+        height: double.infinity,
         padding: const EdgeInsets.all(16),
-        child: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 30),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Update Profile Info',
-                    style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue),
-                  ),
-                ),
                 updateProfileWidget(),
-                const SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          String response = await updateProfile();
-                          if (response == "Cập nhật thành công") {
-                            // ignore: use_build_context_synchronously
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Detail(),
-                              ),
-                            );
-                          } else {
-                            print(response);
-                          }
-                        },
-                        child: const Text('Update Profile'),
+                const SizedBox(height: 26),
+                Center(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            String response = await updateProfile();
+                            if (response == "Cập nhật thành công") {
+                              reloadUser();
+                            } else {
+                              print(response);
+                            }
+                          },
+                          child: const Text('Update Profile'),
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      width: 16,
-                    ),
-                  ],
+                      const SizedBox(
+                        width: 16,
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),
@@ -127,9 +131,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         controller: controller,
         obscureText: label.contains('Password'),
         onChanged: (value) {
-          setState(() {
-            // Update the temp variable if needed
-          });
+          setState(() {});
         },
         decoration: InputDecoration(
             labelText: label,
@@ -154,6 +156,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         textField(_fullNameController, "Full Name", Icons.text_fields_outlined),
         textField(_numberIDController, "NumberID", Icons.key),
         textField(_phoneNumberController, "PhoneNumber", Icons.phone),
+        textField(_genderController, "Gender", Icons.sentiment_satisfied_alt),
         textField(_birthDayController, "BirthDay", Icons.date_range),
         textField(_schoolYearController, "SchoolYear", Icons.school),
         textField(_schoolKeyController, "SchoolKey", Icons.school),

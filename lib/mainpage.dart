@@ -1,27 +1,32 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_api/app/page/category/categorylist.screen.dart';
+import 'package:flutter_api/app/page/home/user.list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 import '/app/model/category.dart';
 import '/app/model/user.dart';
-import '/app/page/detail.dart';
+import 'app/page/User/detail.dart';
 import '/app/route/page1.dart';
 import '/app/route/page2.dart';
 import '/app/route/page3.dart';
-import 'package:flutter/material.dart';
 import 'app/page/defaultwidget.dart';
 import 'app/data/sharepre.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// Import DisplayCategories
 
 class Mainpage extends StatefulWidget {
-  const Mainpage({super.key});
+  final int initialIndex;
+  const Mainpage({super.key, this.initialIndex = 0});
 
   @override
   State<Mainpage> createState() => _MainpageState();
 }
 
 class _MainpageState extends State<Mainpage> {
+  late int _selectedIndex;
   User user = User.userEmpty();
-  int _selectedIndex = 0;
 
   getDataUser() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -33,8 +38,8 @@ class _MainpageState extends State<Mainpage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    _selectedIndex = widget.initialIndex;
     getDataUser();
     if (kDebugMode) {
       print(user.imageURL);
@@ -48,37 +53,29 @@ class _MainpageState extends State<Mainpage> {
   }
 
   _loadWidget(int index) {
-    var nameWidgets = "Home";
     switch (index) {
       case 0:
-        nameWidgets = "Home";
-        break;
+        return UserListScreen();
       case 1:
-        nameWidgets = "Contact";
-        break;
+        return const CategoryList();
       case 2:
-        nameWidgets = "Info";
-        break;
+        return const DefaultWidget(title: "Shop");
       case 3:
-        {
-          return const Detail();
-        }
+        return const Detail();
       default:
-        nameWidgets = "None";
-        break;
+        return const DefaultWidget(title: "None");
     }
-    return DefaultWidget(title: nameWidgets);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFFF5F6FA),
         title: const Text("HL Mobile"),
       ),
       drawer: Drawer(
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
@@ -107,54 +104,59 @@ class _MainpageState extends State<Mainpage> {
               title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
-                _selectedIndex = 0;
-                setState(() {});
+                _onItemTapped(0);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.contact_mail),
-              title: const Text('History'),
+              leading: const Icon(Icons.category_rounded),
+              title: const Text('Category'),
               onTap: () {
                 Navigator.pop(context);
-                _selectedIndex = 1;
-                setState(() {});
+                _onItemTapped(1);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.contact_mail),
-              title: const Text('Cart'),
+              leading: const Icon(Icons.shop),
+              title: const Text('Shop'),
               onTap: () {
                 Navigator.pop(context);
-                _selectedIndex = 2;
-                setState(() {});
+                _onItemTapped(2);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                _onItemTapped(3);
               },
             ),
             ListTile(
               leading: const Icon(Icons.pages),
-              title: const Text('Page1'),
+              title: const Text('Cart'),
               onTap: () {
                 Navigator.pop(context);
-                _selectedIndex = 0;
+                _onItemTapped(0);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Page1()));
               },
             ),
             ListTile(
               leading: const Icon(Icons.pages),
-              title: const Text('Page2'),
+              title: const Text('History'),
               onTap: () {
                 Navigator.pop(context);
-                _selectedIndex = 0;
+                _onItemTapped(0);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Page2()));
               },
             ),
             ListTile(
               leading: const Icon(Icons.pages),
-              title: const Text('Page3'),
+              title: const Text(''),
               onTap: () {
                 Navigator.pop(context);
-                _selectedIndex = 0;
+                _onItemTapped(0);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Page3()));
               },
@@ -174,28 +176,20 @@ class _MainpageState extends State<Mainpage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shop),
-            label: 'Cart',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'User',
-          ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _selectedIndex,
+        height: 60.0,
+        items: const <Widget>[
+          Icon(Icons.home, size: 30),
+          Icon(Icons.category_rounded, size: 30),
+          Icon(Icons.shop, size: 30),
+          Icon(Icons.person, size: 30),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.grey,
+        color: Colors.white,
+        buttonBackgroundColor: Colors.white,
+        backgroundColor: Colors.blueAccent,
+        animationCurve: Curves.easeInOut,
+        animationDuration: const Duration(milliseconds: 400),
         onTap: _onItemTapped,
       ),
       body: _loadWidget(_selectedIndex),

@@ -10,7 +10,7 @@ class User {
   String? schoolKey;
   String? dateCreated;
   bool? status;
-  String? token;
+  //String? token;
   User({
     required this.idNumber,
     required this.accountId,
@@ -23,11 +23,11 @@ class User {
     required this.schoolKey,
     required this.dateCreated,
     required this.status,
-    required this.token,
+    //required this.token,
   });
   static User userEmpty() {
     return User(
-        token: '',
+        //token: '',
         idNumber: '',
         accountId: '',
         fullName: '',
@@ -42,7 +42,7 @@ class User {
   }
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        token: json["token"],
+        //token: json["token"],
         idNumber: json["idNumber"],
         accountId: json["accountID"],
         fullName: json["fullName"],
@@ -60,7 +60,7 @@ class User {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['token'] = token;
+    //data['token'] = token;
     data['idNumber'] = idNumber;
     data['accountId'] = accountId;
     data['gender'] = gender;
@@ -71,7 +71,7 @@ class User {
     data['birthDay'] = birthDay;
     data['schoolYear'] = schoolYear;
     data['schoolKey'] = schoolKey;
-
+    data['status'] = status;
     return data;
   }
 }

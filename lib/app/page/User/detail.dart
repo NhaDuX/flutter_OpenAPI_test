@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_api/app/page/editprofile.dart';
-import '../model/user.dart';
+import 'package:flutter_api/app/page/User/editprofile.dart';
+import '../../model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Detail extends StatefulWidget {
