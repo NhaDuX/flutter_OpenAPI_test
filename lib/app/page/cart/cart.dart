@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_api/app/data/api.dart';
 import 'package:flutter_api/app/data/sqlite.dart';
 import 'package:flutter_api/app/model/cart.dart';
+import 'package:flutter_api/mainpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
@@ -21,50 +22,65 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text("Cart List"),
-        Expanded(
-          flex: 11,
-          child: FutureBuilder<List<Cart>>(
-            future: _getProducts(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final itemProduct = snapshot.data![index];
-                    return _buildProduct(itemProduct, context);
-                  },
-                ),
-              );
-            },
+    return Container(
+      color: const Color(0xFFF5F6FA),
+      child: Column(
+        children: [
+          AppBar(
+            title: const Text("Cart"),
           ),
-        ),
-        Expanded(
-            flex: 1,
-            child: ElevatedButton(
-                onPressed: () async {
-                  SharedPreferences pref =
-                      await SharedPreferences.getInstance();
-                  List<Cart> temp = await _databaseHelper.products();
-                  await APIRepository()
-                      .addBill(temp, pref.getString('token').toString());
-                  _databaseHelper.clear();
-                },
-                child: const Text("Payment")))
-      ],
+          Expanded(
+            flex: 11,
+            child: FutureBuilder<List<Cart>>(
+              future: _getProducts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final itemProduct = snapshot.data![index];
+                      return _buildProduct(itemProduct, context);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                    onPressed: () async {
+                      SharedPreferences pref =
+                          await SharedPreferences.getInstance();
+                      List<Cart> temp = await _databaseHelper.products();
+                      await APIRepository()
+                          .addBill(temp, pref.getString('token').toString());
+                      _databaseHelper.clear();
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const Mainpage(initialIndex: 2),
+                          ));
+                    },
+                    child: const Text("Payment"))),
+          )
+        ],
+      ),
     );
   }
 
   Widget _buildProduct(Cart pro, BuildContext context) {
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(

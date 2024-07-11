@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_api/app/page/cart/cart.dart';
 import 'package:flutter_api/app/page/category/categorylist.screen.dart';
+import 'package:flutter_api/app/page/history/history_screen.dart';
 import 'package:flutter_api/app/page/home/user.list.dart';
+import 'package:flutter_api/app/page/product/product.list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
-import '/app/model/category.dart';
 import '/app/model/user.dart';
 import 'app/page/User/detail.dart';
 import '/app/route/page1.dart';
@@ -55,26 +57,30 @@ class _MainpageState extends State<Mainpage> {
   _loadWidget(int index) {
     switch (index) {
       case 0:
-        return UserListScreen();
+        return const UserListScreen();
       case 1:
         return const CategoryList();
-      case 2:
-        return const DefaultWidget(title: "Shop");
       case 3:
+        return const ProductList();
+      case 2:
+        return const HistoryScreen();
+      case 4:
         return const Detail();
       default:
-        return const DefaultWidget(title: "None");
+        return const UserListScreen();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF5F6FA),
         title: const Text("HL Mobile"),
       ),
       drawer: Drawer(
+        backgroundColor: const Color(0xFFF5F6FA),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -120,7 +126,7 @@ class _MainpageState extends State<Mainpage> {
               title: const Text('Shop'),
               onTap: () {
                 Navigator.pop(context);
-                _onItemTapped(2);
+                _onItemTapped(3);
               },
             ),
             ListTile(
@@ -128,7 +134,7 @@ class _MainpageState extends State<Mainpage> {
               title: const Text('Profile'),
               onTap: () {
                 Navigator.pop(context);
-                _onItemTapped(3);
+                _onItemTapped(4);
               },
             ),
             ListTile(
@@ -137,8 +143,10 @@ class _MainpageState extends State<Mainpage> {
               onTap: () {
                 Navigator.pop(context);
                 _onItemTapped(0);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Page1()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CartScreen()));
               },
             ),
             ListTile(
@@ -147,23 +155,23 @@ class _MainpageState extends State<Mainpage> {
               onTap: () {
                 Navigator.pop(context);
                 _onItemTapped(0);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Page2()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HistoryScreen()));
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.pages),
-              title: const Text(''),
-              onTap: () {
-                Navigator.pop(context);
-                _onItemTapped(0);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Page3()));
-              },
-            ),
-            const Divider(
-              color: Colors.black,
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.pages),
+            //   title: const Text(''),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     _onItemTapped(0);
+            //     Navigator.push(context,
+            //         MaterialPageRoute(builder: (context) => const Page3()));
+            //   },
+            // ),
+            const Divider(color: Color.fromARGB(255, 156, 156, 157)),
             user.accountId == ''
                 ? const SizedBox()
                 : ListTile(
@@ -178,10 +186,11 @@ class _MainpageState extends State<Mainpage> {
       ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
-        height: 60.0,
+        height: 70.0,
         items: const <Widget>[
           Icon(Icons.home, size: 30),
           Icon(Icons.category_rounded, size: 30),
+          Icon(Icons.history, size: 30),
           Icon(Icons.shop, size: 30),
           Icon(Icons.person, size: 30),
         ],
