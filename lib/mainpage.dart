@@ -4,19 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_api/app/page/cart/cart.dart';
 import 'package:flutter_api/app/page/category/categorylist.screen.dart';
 import 'package:flutter_api/app/page/history/history_screen.dart';
-import 'package:flutter_api/app/page/home/user.list.dart';
+import 'package:flutter_api/app/page/home/home.product.list.dart';
+import 'package:flutter_api/app/page/user.admin/user.list.dart';
 import 'package:flutter_api/app/page/product/product.list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 import '/app/model/user.dart';
-import 'app/page/User/detail.dart';
-import '/app/route/page1.dart';
-import '/app/route/page2.dart';
-import '/app/route/page3.dart';
-import 'app/page/defaultwidget.dart';
+import 'app/page/user/detail.dart';
 import 'app/data/sharepre.dart';
-// Import DisplayCategories
+import 'package:flutter_api/app/data/sqlite.dart';
+
+ValueNotifier<int> cartItemCountNotifier = ValueNotifier<int>(0);
 
 class Mainpage extends StatefulWidget {
   final int initialIndex;
@@ -29,12 +28,21 @@ class Mainpage extends StatefulWidget {
 class _MainpageState extends State<Mainpage> {
   late int _selectedIndex;
   User user = User.userEmpty();
+  int _cartItemCount = 0;
 
-  getDataUser() async {
+  Future<void> getDataUser() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String strUser = pref.getString('user')!;
+    String? strUser = pref.getString('user');
+    if (strUser != null) {
+      user = User.fromJson(jsonDecode(strUser));
+      setState(() {});
+    }
+  }
 
-    user = User.fromJson(jsonDecode(strUser));
+  Future<void> _updateCartItemCount() async {
+    final cartItems = await DatabaseHelper().products();
+    _cartItemCount = cartItems.fold(0, (sum, item) => sum + item.count);
+    cartItemCountNotifier.value = _cartItemCount;
     setState(() {});
   }
 
@@ -43,6 +51,12 @@ class _MainpageState extends State<Mainpage> {
     super.initState();
     _selectedIndex = widget.initialIndex;
     getDataUser();
+    _updateCartItemCount();
+    cartItemCountNotifier.addListener(() {
+      setState(() {
+        _cartItemCount = cartItemCountNotifier.value;
+      });
+    });
     if (kDebugMode) {
       print(user.imageURL);
     }
@@ -54,20 +68,20 @@ class _MainpageState extends State<Mainpage> {
     });
   }
 
-  _loadWidget(int index) {
+  Widget _loadWidget(int index) {
     switch (index) {
       case 0:
-        return const UserListScreen();
+        return const HomeProductList();
       case 1:
         return const CategoryList();
-      case 3:
-        return const ProductList();
       case 2:
         return const HistoryScreen();
+      case 3:
+        return const ProductList();
       case 4:
         return const Detail();
       default:
-        return const UserListScreen();
+        return const HomeProductList();
     }
   }
 
@@ -78,6 +92,51 @@ class _MainpageState extends State<Mainpage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFF5F6FA),
         title: const Text("HL Mobile"),
+        actions: [
+          ValueListenableBuilder<int>(
+            valueListenable: cartItemCountNotifier,
+            builder: (context, count, child) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CartScreen()),
+                      ).then((_) => _updateCartItemCount());
+                    },
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         backgroundColor: const Color(0xFFF5F6FA),
@@ -86,21 +145,17 @@ class _MainpageState extends State<Mainpage> {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 243, 152, 33),
+                color: Color.fromARGB(255, 218, 218, 218),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  user.imageURL!.length < 5
-                      ? const SizedBox()
-                      : CircleAvatar(
-                          radius: 40,
-                          backgroundImage: NetworkImage(
-                            user.imageURL!,
-                          )),
-                  const SizedBox(
-                    height: 8,
-                  ),
+                  if (user.imageURL!.length >= 5)
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundImage: NetworkImage(user.imageURL!),
+                    ),
+                  const SizedBox(height: 8),
                   Text(user.fullName!),
                 ],
               ),
@@ -122,11 +177,17 @@ class _MainpageState extends State<Mainpage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.shop),
-              title: const Text('Shop'),
+              leading: const Icon(Icons.supervised_user_circle),
+              title: const Text('User List'),
               onTap: () {
                 Navigator.pop(context);
-                _onItemTapped(3);
+                _onItemTapped(0);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserListScreen(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -138,39 +199,19 @@ class _MainpageState extends State<Mainpage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.pages),
+              leading: const Icon(Icons.shopping_cart),
               title: const Text('Cart'),
               onTap: () {
                 Navigator.pop(context);
                 _onItemTapped(0);
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CartScreen()));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CartScreen(),
+                  ),
+                );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.pages),
-              title: const Text('History'),
-              onTap: () {
-                Navigator.pop(context);
-                _onItemTapped(0);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const HistoryScreen()));
-              },
-            ),
-            // ListTile(
-            //   leading: const Icon(Icons.pages),
-            //   title: const Text(''),
-            //   onTap: () {
-            //     Navigator.pop(context);
-            //     _onItemTapped(0);
-            //     Navigator.push(context,
-            //         MaterialPageRoute(builder: (context) => const Page3()));
-            //   },
-            // ),
             const Divider(color: Color.fromARGB(255, 156, 156, 157)),
             user.accountId == ''
                 ? const SizedBox()

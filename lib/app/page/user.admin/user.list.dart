@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_api/app/data/api.dart';
 import 'package:flutter_api/app/model/user.admin.dart';
-import 'package:flutter_api/app/page/home/detail.user.admin.dart';
+import 'package:flutter_api/app/page/user.admin/detail.user.admin.dart';
+import 'package:flutter_api/mainpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserListScreen extends StatefulWidget {
@@ -52,11 +53,34 @@ class _UserListScreenState extends State<UserListScreen> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: Column(
         children: [
+          const Padding(padding: EdgeInsets.only(top: 50)),
+          Row(
+            children: [
+              const Padding(padding: EdgeInsets.only(left: 20)),
+              const Align(
+                alignment: Alignment.centerLeft,
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Mainpage()));
+                },
+              ),
+            ],
+          ),
           Padding(
-            padding: const EdgeInsets.all(15.0),
+            padding:
+                const EdgeInsets.only(top: 10, left: 15, right: 15, bottom: 15),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 hintText: 'Search by accountID',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.search),

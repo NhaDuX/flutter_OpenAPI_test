@@ -34,7 +34,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const Mainpage(initialIndex: 3),
+          builder: (context) => const Mainpage(initialIndex: 4),
         ));
   }
 

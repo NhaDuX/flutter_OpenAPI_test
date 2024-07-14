@@ -443,4 +443,21 @@ class APIRepository {
       rethrow;
     }
   }
+
+  Future<bool> removeBill(String billID, String token) async {
+    try {
+      final body = FormData.fromMap({'billID': billID});
+      Response res = await api.sendRequest.delete('/Bill/remove?billID=$billID',
+          options: Options(headers: header(token)), data: body);
+      if (res.statusCode == 200) {
+        print("ok remove bill");
+        return true;
+      } else {
+        return false;
+      }
+    } catch (ex) {
+      print(ex);
+      rethrow;
+    }
+  }
 }

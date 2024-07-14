@@ -90,6 +90,21 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> deleteProductAll(int id) async {
+    final db = await _databaseService.database;
+    await db.delete('Cart');
+  }
+
+  Future<int> updateProduct(Cart cart) async {
+    final db = await database;
+    return await db.update(
+      'cart',
+      cart.toMap(),
+      where: 'productID = ?',
+      whereArgs: [cart.productID],
+    );
+  }
+
   Future<void> clear() async {
     final db = await _databaseService.database;
     await db.delete('Cart', where: 'count > 0');

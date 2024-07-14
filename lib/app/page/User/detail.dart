@@ -36,58 +36,95 @@ class _DetailState extends State<Detail> {
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-              Stack(
+              const SizedBox(height: 0),
+              Row(
                 children: [
                   CircleAvatar(
                     backgroundImage: NetworkImage(user.imageURL!),
-                    radius: 80,
+                    radius: 40,
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => UpdateProfile(user: user),
+                  const SizedBox(width: 30),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName!,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UpdateProfile(user: user),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "✏️ Edit Profile",
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "Personal Info",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      },
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child:
-                              Icon(Icons.edit, color: Colors.white, size: 16),
-                        ),
+                      ),
+                      Container(
+                        height: 2,
+                        width: 100,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "Teams",
+                      style: TextStyle(
+                        color: Colors.black,
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              Text(
-                user.fullName!,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 30),
-              _buildInfoRow("NumberID", user.idNumber, _blueColor),
-              _buildInfoRow("Fullname", user.fullName, _blueColor),
-              _buildInfoRow("Phone Number", user.phoneNumber, _blueColor),
-              _buildInfoRow("Gender", user.gender, _blueColor),
-              _buildInfoRow("Birth Day", user.birthDay, _blueColor),
-              _buildInfoRow("School Year", user.schoolYear, _blueColor),
-              _buildInfoRow("School Key", user.schoolKey, _blueColor),
-              _buildInfoRow("Date Created", user.dateCreated, _blueColor),
+              _buildInfoRow(
+                  Icons.person, "Username", user.fullName, _blueColor),
+              _buildInfoRow(Icons.assignment_ind_rounded, "NumberID",
+                  user.idNumber, _blueColor),
+              _buildInfoRow(
+                  Icons.phone, "Phone Number", user.phoneNumber, _blueColor),
+              _buildInfoRow(Icons.person, "Gender", user.gender, _blueColor),
+              _buildInfoRow(
+                  Icons.calendar_today, "Birth Day", user.birthDay, _blueColor),
+              _buildInfoRow(
+                  Icons.school, "School Year", user.schoolYear, _blueColor),
+              _buildInfoRow(
+                  Icons.vpn_key, "School Key", user.schoolKey, _blueColor),
+              _buildInfoRow(Icons.date_range, "Date Created", user.dateCreated,
+                  _blueColor),
             ],
           ),
         ),
@@ -95,22 +132,47 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget _buildInfoRow(String label, String? value, Color color) {
+  Widget _buildInfoRow(
+      IconData icon, String label, String? value, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "$label: ",
-            style: const TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              value ?? '',
-              style: TextStyle(
-                  fontSize: 18, color: color, fontWeight: FontWeight.bold),
-            ),
+          Row(
+            children: [
+              Column(
+                children: [
+                  Icon(icon, color: Colors.grey),
+                ],
+              ),
+              const SizedBox(width: 30),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      value ?? '',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black, // Change text color to black
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Divider(
+                      color: Colors.grey[300],
+                      thickness: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

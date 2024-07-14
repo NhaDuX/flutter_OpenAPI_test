@@ -121,7 +121,9 @@ class _ProductAddState extends State<ProductAdd> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
+        backgroundColor: const Color(0xFFF5F6FA),
         title: Text(titleText),
         centerTitle: true,
       ),

@@ -41,6 +41,17 @@ class _ProductBuilderState extends State<ProductBuilder> {
     setState(() {});
   }
 
+  Future<void> _deleteProduct(ProductModel pro) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    bool success = await APIRepository().removeProduct(
+        pro.id,
+        pref.getString('accountID').toString(),
+        pref.getString('token').toString());
+    if (success) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<ProductModel>>(
@@ -67,22 +78,11 @@ class _ProductBuilderState extends State<ProductBuilder> {
 
   Widget _buildProduct(ProductModel pro, BuildContext context) {
     return Card(
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            // Container(
-            //   height: 20,
-            //   width: 20,
-            //   alignment: Alignment.center,
-            //   child: Text(
-            //     pro.id.toString(),
-            //     style: const TextStyle(
-            //       fontSize: 18,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            // ),
             const SizedBox(width: 10),
             Container(
               height: 110,
@@ -135,23 +135,6 @@ class _ProductBuilderState extends State<ProductBuilder> {
                 Column(
                   children: [
                     IconButton(
-                      onPressed: () async {
-                        SharedPreferences pref =
-                            await SharedPreferences.getInstance();
-                        bool success = await APIRepository().removeProduct(
-                            pro.id,
-                            pref.getString('accountID').toString(),
-                            pref.getString('token').toString());
-                        if (success) {
-                          setState(() {});
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-                    ),
-                    IconButton(
                         onPressed: () {
                           setState(() {
                             Navigator.of(context)
@@ -176,13 +159,17 @@ class _ProductBuilderState extends State<ProductBuilder> {
                 Column(
                   children: [
                     IconButton(
-                        onPressed: () async {
-                          _onAddCart(pro);
-                        },
-                        icon: const Icon(
-                          Icons.add,
-                          color: Colors.blue,
-                        )),
+                      onPressed: () async {
+                        bool confirm = await _showConfirmationDialog(context);
+                        if (confirm) {
+                          await _deleteProduct(pro);
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                    ),
                   ],
                 )
               ],
@@ -191,5 +178,28 @@ class _ProductBuilderState extends State<ProductBuilder> {
         ),
       ),
     );
+  }
+
+  Future<bool> _showConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Xác nhận'),
+              content: const Text('Bạn có muốn xoá sản phẩm không?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Không'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Có'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }

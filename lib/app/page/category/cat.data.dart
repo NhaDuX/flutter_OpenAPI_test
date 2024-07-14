@@ -125,13 +125,48 @@ class _CategoryBuilderState extends State<CategoryBuilder> {
             ),
             IconButton(
               onPressed: () async {
-                SharedPreferences pref = await SharedPreferences.getInstance();
-                bool success = await APIRepository().removeCategory(
-                    breed.id,
-                    pref.getString('accountID').toString(),
-                    pref.getString('token').toString());
-                if (success) {
-                  setState(() {});
+                final shouldDelete = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Delete Category'),
+                      content:
+                          const Text('Bạn có muốn xoá Category này không?'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                        ),
+                        TextButton(
+                          child: const Text('Delete'),
+                          onPressed: () {
+                            Navigator.of(context).pop(true);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (shouldDelete == true) {
+                  SharedPreferences pref =
+                      await SharedPreferences.getInstance();
+                  bool success = await APIRepository().removeCategory(
+                      breed.id,
+                      pref.getString('accountID').toString(),
+                      pref.getString('token').toString());
+                  if (success) {
+                    setState(() {});
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('Failed to delete category ${breed.name}'),
+                      ),
+                    );
+                  }
                 }
               },
               icon: const Icon(
